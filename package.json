@@ -1,0 +1,39 @@
+{
+  "name": "unhas-gacor-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/application/web.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BenediktusG/unhas-gacor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BenediktusG/unhas-gacor/issues"
+  },
+  "homepage": "https://github.com/BenediktusG/unhas-gacor#readme",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "firebase-admin": "^13.4.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.32.0",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.3",
+    "globals": "^16.3.0"
+  },
+  "type": "module"
+}
