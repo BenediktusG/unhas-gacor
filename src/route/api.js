@@ -6,3 +6,4 @@ export const userRouter = new express.Router();
 userRouter.use(authMiddleware);
 
 userRouter.get('/money', userController.getMoney);
+userRouter.get('/bonus', userController.checkBonusAvailability);

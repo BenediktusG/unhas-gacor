@@ -1,5 +1,5 @@
-import { admin } from "../application/firebase";
-import { AuthenticationError } from "../error/authentication-error";
+import { admin } from "../application/firebase.js";
+import { AuthenticationError } from "../error/authentication-error.js";
 
 export const authMiddleware = async (req, res, next) => {
     const authHeader = req.get('Authorization');

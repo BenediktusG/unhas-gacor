@@ -11,6 +11,24 @@ const getMoney = async(user) => {
     };
 };
 
+const checkBonusAvailability = async (user) => {
+    let balance = await db.collection("money").doc(user.uid).get();
+    if (!balance) {
+        await db.collection("money").doc(user.uid).set(0);
+        balance = 0;
+    }
+    if (balance < 100.000) {
+        return {
+            eligible: true,
+        };
+    } else {
+        return {
+            eligible: false,
+        };
+    }
+};
+
 export default {
-    getMoney
+    getMoney,
+    checkBonusAvailability,
 };
