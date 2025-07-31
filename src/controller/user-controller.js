@@ -16,7 +16,20 @@ const checkBonusAvailability = async (req, res) => {
     });
 };
 
+const claimBonus = async (req, res, next) => {
+    try {
+        const result = await userService.checkBonusAvailability(req.user);
+        res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (e) {
+        next(e);
+    }
+};
+
 export default {
     getMoney,
     checkBonusAvailability,
+    claimBonus,
 };
