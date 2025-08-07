@@ -202,7 +202,7 @@ paths:
                       bonus:
                         type: integer
                         example: 10000
-                      balance:
+                      money:
                         type: integer
                         example: 11000
         401:

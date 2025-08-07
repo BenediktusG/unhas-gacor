@@ -5,23 +5,15 @@ import { registerUserValidation } from "../validation/user-validation.js";
 import { validate } from "../validation/validation.js";
 
 const getMoney = async(user) => {
-    let moneyDoc = await db.collection("money").doc(user.uid).get();
-    if (!moneyDoc) {
-        await db.collection("money").doc(user.uid).set(0);
-        moneyDoc = 0;
-    }
+    const { money } = await db.collection('user-profile').doc(user.uid).get();
     return {
-        money: moneyDoc,
+        money: money,
     };
 };
 
 const checkBonusAvailability = async (user) => {
-    let balance = await db.collection("money").doc(user.uid).get();
-    if (!balance) {
-        await db.collection("money").doc(user.uid).set(0);
-        balance = 0;
-    }
-    if (balance < 100.000) {
+    const { money } = await db.collection('user-profile').doc(user.uid).get();
+    if (money < 100.000) {
         return {
             eligible: true,
         };
@@ -33,19 +25,14 @@ const checkBonusAvailability = async (user) => {
 };
 
 const claimBonus = async (user) => {
-    let balance = await db.collection("money").doc(user.uid).get();
-    if (!balance) {
-        await db.collection("money").doc(user.uid).set(0);
-        balance = 0;
-    }
-    if (balance > 100000) {
+    const { money } = await db.collection('user-profile').doc(user.uid).get();
+    if (money > 100000) {
         throw new AuthorizationError('Access denied', 'UNAUTHORIZED_ACTION');
     }
-    balance += 100000;
-    await db.collection("money").doc(user.uid).set(balance);
+    await db.collection("money").doc(user.uid).set(money + 100000);
     return {
         bonus: 100000,
-        balance: balance,
+        money: money + 100000,
     };
 };
 
