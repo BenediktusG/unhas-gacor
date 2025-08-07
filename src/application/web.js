@@ -5,6 +5,11 @@ import { userRouter } from '../route/api.js';
 dotenv.config();
 export const web = express();
 
+web.use(cors({
+    origin: process.env.FRONT_END_URL,
+    credentials: true,
+}));
+
 web.use(userRouter);
 
 web.listen(process.env.APP_PORT, () => {
