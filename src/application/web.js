@@ -13,6 +13,8 @@ web.use(cors({
 
 web.use(userRouter);
 
+web.use(express.json());
+
 web.listen(process.env.APP_PORT, () => {
     console.log(`Application is running in http://localhost:${process.env.APP_PORT}`);
 });

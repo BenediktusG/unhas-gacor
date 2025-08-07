@@ -8,7 +8,7 @@ export const authMiddleware = async (req, res, next) => {
         next(new AuthenticationError('You need to sign in to access this resource', 'AUTH_REQUIRED'));
     } else {
         try {
-            const decoded = admin.auth().verifyIdToken(token);
+            const decoded = await admin.auth().verifyIdToken(token);
             req.user = decoded;
             next();
         } catch {
