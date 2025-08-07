@@ -42,9 +42,22 @@ const registerProfile = async (req, res, next) => {
     }
 };
 
+const getProfile = async (req, res, next) => {
+    try {
+        const result = await userService.getProfile(req.user);
+        res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (e) {
+        next(e);
+    }
+};
+
 export default {
     getMoney,
     checkBonusAvailability,
     claimBonus,
     registerProfile,
+    getProfile,
 };

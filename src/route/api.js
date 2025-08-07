@@ -9,3 +9,4 @@ userRouter.get('/money', userController.getMoney);
 userRouter.get('/bonus', userController.checkBonusAvailability);
 userRouter.post('/bonus', userController.claimBonus);
 userRouter.post('/register', userController.registerProfile);
+userRouter.get('/profile', userController.getProfile);

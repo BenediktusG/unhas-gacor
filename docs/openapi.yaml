@@ -105,7 +105,9 @@ paths:
                     properties:
                       code: 
                         type: string
-                        example: INCOMPLETE_PROFILE                
+                        example: INCOMPLETE_PROFILE
+                      message:
+                        type: string                
   /money:
     get:
       tags:

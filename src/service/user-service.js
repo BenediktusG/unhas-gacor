@@ -1,5 +1,6 @@
 import { db } from "../application/database.js";
 import { AuthorizationError } from "../error/authorizationError.js";
+import { ConflictError } from "../error/conflict-error.js";
 import { registerUserValidation } from "../validation/user-validation.js";
 import { validate } from "../validation/validation.js";
 
@@ -56,8 +57,17 @@ const registerProfile = async (request, user) => {
     });
 };
 
+const getProfile = async (user) => {
+    const profile = await db.collection('user-profile').doc(user.uid).get();
+    if (!profile) {
+        throw new ConflictError('missing user information', 'INCOMPLETE_PROFILE');
+    }
+};
+
 export default {
     getMoney,
     checkBonusAvailability,
     claimBonus,
+    registerProfile,
+    getProfile,
 };
