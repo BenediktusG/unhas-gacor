@@ -5,6 +5,107 @@ info:
   version: 1.0.0
   
 paths:
+  /register:
+    post:
+      tags:
+        - User
+      description: Register user information
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+      responses:
+        201:
+          description: success register user information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+        400:
+          description: failed to register user information because of invalid request body
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code: 
+                        type: string
+                        example: VALIDATION_ERROR
+                      message:
+                        type: string
+        401:
+          description: Unauthorized - The user must be authenticated to access this resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                AuthorizationError:
+                  $ref: '#/components/examples/authRequiredError'
+  /profile:
+    get:
+      tags:
+      - User
+      description: Get user information
+      responses:
+        200:
+          description: success get user information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      fullName: 
+                        type: string
+                      money:
+                        type: number
+        401:
+          description: Unauthorized - The user must be authenticated to access this resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                AuthorizationError:
+                  $ref: '#/components/examples/authRequiredError'
+        409:
+          description: Failed to get the user information due to incomplete user profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      code: 
+                        type: string
+                        example: INCOMPLETE_PROFILE                
   /money:
     get:
       tags:
@@ -34,6 +135,22 @@ paths:
               examples:
                 AuthorizationError:
                   $ref: '#/components/examples/authRequiredError'
+        409:
+          description: Failed to get the user information due to incomplete user profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      code: 
+                        type: string
+                        example: INCOMPLETE_PROFILE
+  
   /bonus:
     get:
       tags:
