@@ -1,5 +1,7 @@
 import { db } from "../application/database.js";
 import { AuthorizationError } from "../error/authorizationError.js";
+import { registerUserValidation } from "../validation/user-validation.js";
+import { validate } from "../validation/validation.js";
 
 const getMoney = async(user) => {
     let moneyDoc = await db.collection("money").doc(user.uid).get();
@@ -44,6 +46,14 @@ const claimBonus = async (user) => {
         bonus: 100000,
         balance: balance,
     };
+};
+
+const registerProfile = async (request, user) => {
+    const { fullName } = validate(registerUserValidation, request);
+    await db.collection('user-profile').doc(user.uid).set({
+        fullName: fullName,
+        money: 0,
+    });
 };
 
 export default {
