@@ -224,7 +224,57 @@ paths:
               examples:
                 Forbidden:
                   $ref: '#/components/examples/unauthorizedError'
-            
+  /spin:
+    post:
+      tags:
+      - Game
+      description: Spin the slot machine
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                betAmount:
+                  type: number
+      responses:
+        200:
+          description: success spin the slot machine
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data: 
+                    type: object
+                    properties:
+                      reward:
+                        type: number
+                      result:
+                        type: array
+                        items:
+                          type: number
+        401:
+          description: Unauthorized - The user must be authenticated to access this resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                AuthorizationError:
+                  $ref: '#/components/examples/authRequiredError'
+        403:
+          description: Forbidden - The user is not authorized to do the action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                Forbidden:
+                  $ref: '#/components/examples/unauthorizedError'
+      
 components:
   schemas:
     ErrorResponse:
