@@ -1,9 +1,9 @@
 openapi: 3.0.3
-info: 
+info:
   title: Unhas Gacor 77
   description: Online slot machine simulation
   version: 1.0.0
-  
+
 paths:
   /register:
     post:
@@ -46,7 +46,7 @@ paths:
                   error:
                     type: object
                     properties:
-                      code: 
+                      code:
                         type: string
                         example: VALIDATION_ERROR
                       message:
@@ -56,14 +56,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 AuthorizationError:
-                  $ref: '#/components/examples/authRequiredError'
+                  $ref: "#/components/examples/authRequiredError"
   /profile:
     get:
       tags:
-      - User
+        - User
       description: Get user information
       responses:
         200:
@@ -78,7 +78,7 @@ paths:
                   data:
                     type: object
                     properties:
-                      fullName: 
+                      fullName:
                         type: string
                       money:
                         type: number
@@ -87,10 +87,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 AuthorizationError:
-                  $ref: '#/components/examples/authRequiredError'
+                  $ref: "#/components/examples/authRequiredError"
         409:
           description: Failed to get the user information due to incomplete user profile
           content:
@@ -103,11 +103,11 @@ paths:
                   error:
                     type: object
                     properties:
-                      code: 
+                      code:
                         type: string
                         example: INCOMPLETE_PROFILE
                       message:
-                        type: string                
+                        type: string
   /money:
     get:
       tags:
@@ -121,7 +121,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  success: 
+                  success:
                     type: boolean
                   data:
                     type: object
@@ -133,10 +133,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 AuthorizationError:
-                  $ref: '#/components/examples/authRequiredError'
+                  $ref: "#/components/examples/authRequiredError"
         409:
           description: Failed to get the user information due to incomplete user profile
           content:
@@ -149,85 +149,148 @@ paths:
                   error:
                     type: object
                     properties:
-                      code: 
+                      code:
                         type: string
                         example: INCOMPLETE_PROFILE
-  
+
   /bonus:
     get:
       tags:
-      - User
-      description: Check if the user is eliglbe for the bonus
+        - User
+      description: Check if the user is eligible for the daily bonus
       responses:
         200:
-          description: success get the user's bonus eligibility status
+          description: success get the user's daily bonus eligibility status
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  success: 
+                  success:
                     type: boolean
+                    example: true
                   data:
                     type: object
                     properties:
                       eligible:
                         type: boolean
+                        example: true
+                      lastBonusDate:
+                        type: string
+                        format: date
+                        nullable: true
+                        example: "2025-08-08"
+                      todayDate:
+                        type: string
+                        format: date
+                        example: "2025-08-08"
+                      message:
+                        type: string
+                        example: "Daily bonus available!"
         401:
           description: Unauthorized - The user must be authenticated to access this resource.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 AuthorizationError:
-                  $ref: '#/components/examples/authRequiredError'
-    post:
-      tags:
-      - User
-      description: Get bonus for the user
-      responses:
-        200:
-          description: success receive the bonus
+                  $ref: "#/components/examples/authRequiredError"
+        409:
+          description: Failed to check the user's daily bonus due to incomplete user profile
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  success: 
+                  success:
                     type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: INCOMPLETE_PROFILE
+                      message:
+                        type: string
+    post:
+      tags:
+        - User
+      description: Claim the user's daily bonus (once per day)
+      responses:
+        200:
+          description: success claim the daily bonus
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
                   data:
                     type: object
                     properties:
                       bonus:
                         type: integer
-                        example: 10000
+                        example: 100000
                       money:
                         type: integer
-                        example: 11000
+                        example: 150000
+                      previousMoney:
+                        type: integer
+                        example: 50000
+                      bonusDate:
+                        type: string
+                        format: date
+                        example: "2025-08-08"
+                      message:
+                        type: string
+                        example: "Daily bonus claimed successfully! Come back tomorrow for another bonus."
         401:
           description: Unauthorized - The user must be authenticated to access this resource.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 AuthorizationError:
-                  $ref: '#/components/examples/authRequiredError'
-        
+                  $ref: "#/components/examples/authRequiredError"
         403:
-          description: Forbidden - The user is not authorized to do the action
+          description: Forbidden - The user is not authorized to claim the bonus (e.g., already claimed today)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
-                Forbidden:
-                  $ref: '#/components/examples/unauthorizedError'
+                AlreadyClaimed:
+                  value:
+                    success: false
+                    error:
+                      code: UNAUTHORIZED_ACTION
+                      message: "You have already claimed your daily bonus today. Come back tomorrow!"
+        409:
+          description: Failed to claim the daily bonus due to incomplete user profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: INCOMPLETE_PROFILE
+
   /spin:
     post:
       tags:
-      - Game
+        - Game
       description: Spin the slot machine
       requestBody:
         content:
@@ -247,7 +310,7 @@ paths:
                 properties:
                   success:
                     type: boolean
-                  data: 
+                  data:
                     type: object
                     properties:
                       reward:
@@ -263,20 +326,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 AuthorizationError:
-                  $ref: '#/components/examples/authRequiredError'
+                  $ref: "#/components/examples/authRequiredError"
         403:
           description: Forbidden - The user is not authorized to do the action
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 Forbidden:
-                  $ref: '#/components/examples/unauthorizedError'
-      
+                  $ref: "#/components/examples/unauthorizedError"
+
 components:
   schemas:
     ErrorResponse:
@@ -285,7 +348,7 @@ components:
         success:
           type: boolean
           example: false
-        error: 
+        error:
           type: object
           properties:
             code:
@@ -300,12 +363,12 @@ components:
     authRequiredError:
       value:
         success: false
-        error: 
+        error:
           code: AUTH_REQUIRED
           message: You have to authenticated to access this resource
     unauthorizedError:
       value:
         success: false
-        error: 
+        error:
           code: UNAUTHORIZED_ACTION
           message: You are not authorized to do the action
