@@ -10,4 +10,8 @@ const spin = async (req, res, next) => {
     } catch (e) {
         next(e);
     }
-}
+};
+
+export default {
+    spin,
+};

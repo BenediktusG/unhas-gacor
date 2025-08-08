@@ -1,6 +1,7 @@
 import express from 'express';
 import { authMiddleware } from '../middleware/auth-middleware.js';
 import userController from '../controller/user-controller.js';
+import gameController from '../controller/game-controller.js';
 
 export const userRouter = new express.Router();
 userRouter.use(authMiddleware);
@@ -10,3 +11,4 @@ userRouter.get('/bonus', userController.checkBonusAvailability);
 userRouter.post('/bonus', userController.claimBonus);
 userRouter.post('/register', userController.registerProfile);
 userRouter.get('/profile', userController.getProfile);
+userRouter.post('/spin', gameController.spin);
