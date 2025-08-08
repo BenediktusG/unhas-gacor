@@ -57,6 +57,7 @@ const spin = async (request, user) => {
         while(nextNumber === winningNumber) {
             nextNumber = Math.floor(Math.random()*10);
         }
+        resultArr.push(nextNumber);
         prize = winningNumber*betAmount*2;
         if (prize + money >= 50000000) {
             prize = 0;
