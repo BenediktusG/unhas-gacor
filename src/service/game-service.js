@@ -1,3 +1,4 @@
+import { db } from "../application/database.js";
 import { BadRequestError } from "../error/bad-request-error.js";
 import { spinValidation } from "../validation/game-validation.js";
 import { validate } from "../validation/validation.js";

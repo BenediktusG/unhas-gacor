@@ -15,7 +15,6 @@ export const authMiddleware = async (req, res, next) => {
   } else {
     try {
       const decoded = await admin.auth().verifyIdToken(token);
-      console.log(decoded);
       req.user = decoded;
       next();
     } catch {
