@@ -30,7 +30,7 @@ const claimBonus = async (req, res, next) => {
 
 const registerProfile = async (req, res, next) => {
     try {
-        const result = await userService.registerProfile(req.body, req.user);
+        await userService.registerProfile(req.body, req.user);
         res.status(201).json({
             success: true,
             data: {
