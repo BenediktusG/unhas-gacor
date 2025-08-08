@@ -31,6 +31,7 @@ const spin = async (request, user) => {
     let prize;
     if (prob < 0.5) {
         resultArr = generateLosePattern();
+        prize = 0;
     } else if (prob < 0.8) {
         const winningNumber = Math.floor(Math.random()*10);
         for (let i = 0; i < 3; i++) {
@@ -78,6 +79,10 @@ const spin = async (request, user) => {
         .update({
             money: money,
         });
+    
+    for (let i = 0; i < 5; i++) {
+        resultArr[i]--;
+    }
     return {
         reward: prize,
         balance: money,
