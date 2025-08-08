@@ -5,14 +5,14 @@ import { registerUserValidation } from '../validation/user-validation.js';
 import { validate } from '../validation/validation.js';
 
 const getMoney = async (user) => {
-  const { money } = await db.collection('user-profile').doc(user.uid).get();
+  const { money } = await db.collection('user-profile').doc(user.uid).get().data();
   return {
     money: money,
   };
 };
 
 const checkBonusAvailability = async (user) => {
-  const { money } = await db.collection('user-profile').doc(user.uid).get();
+  const { money } = (await db.collection('user-profile').doc(user.uid).get()).data();
   if (money < 100.0) {
     return {
       eligible: true,
@@ -25,7 +25,7 @@ const checkBonusAvailability = async (user) => {
 };
 
 const claimBonus = async (user) => {
-  const { money } = await db.collection('user-profile').doc(user.uid).get();
+  const { money } = (await db.collection('user-profile').doc(user.uid).get()).data();
   if (money > 100000) {
     throw new AuthorizationError('Access denied', 'UNAUTHORIZED_ACTION');
   }
@@ -49,10 +49,11 @@ const registerProfile = async (request, user) => {
 };
 
 const getProfile = async (user) => {
-  const profile = await db.collection('user-profile').doc(user.uid).get();
+  const profile = (await db.collection('user-profile').doc(user.uid).get()).data();
   if (!profile) {
     throw new ConflictError('missing user information', 'INCOMPLETE_PROFILE');
   }
+  return profile;
 };
 
 export default {
