@@ -252,6 +252,8 @@ paths:
                     properties:
                       reward:
                         type: number
+                      balance:
+                        type: number
                       result:
                         type: array
                         items:

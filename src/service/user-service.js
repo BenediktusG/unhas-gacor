@@ -4,24 +4,24 @@ import { ConflictError } from '../error/conflict-error.js';
 import { registerUserValidation } from '../validation/user-validation.js';
 import { validate } from '../validation/validation.js';
 
-const getMoney = async (user) => {
-  const { money } = await db.collection('user-profile').doc(user.uid).get().data();
-  return {
-    money: money,
-  };
+const getMoney = async(user) => {
+    const { money } = (await db.collection('user-profile').doc(user.uid).get()).data();
+    return {
+        money: money,
+    };
 };
 
 const checkBonusAvailability = async (user) => {
-  const { money } = (await db.collection('user-profile').doc(user.uid).get()).data();
-  if (money < 100.0) {
-    return {
-      eligible: true,
-    };
-  } else {
-    return {
-      eligible: false,
-    };
-  }
+    const { money } = (await db.collection('user-profile').doc(user.uid).get()).data();
+    if (money < 100.000) {
+        return {
+            eligible: true,
+        };
+    } else {
+        return {
+            eligible: false,
+        };
+    }
 };
 
 const claimBonus = async (user) => {
