@@ -1,4 +1,4 @@
-import gameService from "../service/game-service"
+import gameService from "../service/game-service.js"
 
 const spin = async (req, res, next) => {
     try {
