@@ -5,13 +5,13 @@ import { validate } from "../validation/validation.js";
 
 const generateLosePattern = () => {
     const resultArr = [];
-    const firstNumber = Math.floor(Math.random()*10);
+    const firstNumber = Math.floor(Math.random()*9);
     resultArr.push(firstNumber);
     for (let i = 1; i < 5; i++) {
-        let nextNumber = Math.floor(Math.random()*10);
+        let nextNumber = Math.floor(Math.random()*9);
         if (i == 2 && resultArr[0] === resultArr[1]) {
             while (nextNumber === firstNumber) {
-                nextNumber = Math.floor(Math.random()*10);
+                nextNumber = Math.floor(Math.random()*9);
             }
         }
         resultArr.push(nextNumber);
@@ -33,29 +33,29 @@ const spin = async (request, user) => {
         resultArr = generateLosePattern();
         prize = 0;
     } else if (prob < 0.8) {
-        const winningNumber = Math.floor(Math.random()*10);
+        const winningNumber = Math.floor(Math.random()*9);
         for (let i = 0; i < 3; i++) {
             resultArr.push(winningNumber);
         }
-        let nextNumber = Math.floor(Math.random()*10);
+        let nextNumber = Math.floor(Math.random()*9);
         while(nextNumber === winningNumber) {
-            nextNumber = Math.floor(Math.random()*10);
+            nextNumber = Math.floor(Math.random()*9);
         }
         resultArr.push(nextNumber);
-        resultArr.push(Math.floor(Math.random()*10));
+        resultArr.push(Math.floor(Math.random()*9));
         prize = winningNumber*betAmount;
         if (prize + money >= 50000000) {
             prize = 0;
             resultArr = generateLosePattern();
         }
     } else if (prob < 0.95) {
-        const winningNumber = Math.floor(Math.random()*10);
+        const winningNumber = Math.floor(Math.random()*9);
         for (let i = 0; i < 4; i++) {
             resultArr.push(winningNumber);
         }
-        let nextNumber = Math.floor(Math.random()*10);
+        let nextNumber = Math.floor(Math.random()*9);
         while(nextNumber === winningNumber) {
-            nextNumber = Math.floor(Math.random()*10);
+            nextNumber = Math.floor(Math.random()*9);
         }
         resultArr.push(nextNumber);
         prize = winningNumber*betAmount*2;
@@ -64,7 +64,7 @@ const spin = async (request, user) => {
             resultArr = generateLosePattern();
         }
     } else {
-        const winningNumber = Math.floor(Math.random()*10);
+        const winningNumber = Math.floor(Math.random()*9);
         for (let i = 0; i < 4; i++) {
             resultArr.push(winningNumber);
         }
@@ -80,10 +80,6 @@ const spin = async (request, user) => {
         .update({
             money: money,
         });
-    
-    for (let i = 0; i < 5; i++) {
-        resultArr[i]--;
-    }
     return {
         reward: prize,
         balance: money,
