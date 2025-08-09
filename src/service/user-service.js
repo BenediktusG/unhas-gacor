@@ -14,66 +14,71 @@ const getMoney = async (user) => {
   };
 };
 
+// Cooldown period for claiming bonuses (24 hours)
+const COOLDOWN_MS = 24 * 60 * 60 * 1000;
+const asDate = (v) =>
+  v ? (typeof v?.toDate === "function" ? v.toDate() : new Date(v)) : null;
+
 const checkBonusAvailability = async (user) => {
-  const userRef = db.collection("user-profile").doc(user.uid);
-  const userSnap = await userRef.get();
-
-  if (!userSnap.exists) {
+  const ref = db.collection("user-profile").doc(user.uid);
+  const snap = await ref.get();
+  if (!snap.exists)
     throw new ConflictError("User profile not found", "INCOMPLETE_PROFILE");
-  }
 
-  const userData = userSnap.data();
-  const todayDate = getTodayDate();
+  const data = snap.data();
+  const last = asDate(data.lastBonusTimestamp);
+  const now = new Date();
 
-  const lastBonusDate = userData.lastBonusDate || null;
-  const hasClaimedToday = lastBonusDate === todayDate;
+  const elapsed = last ? now - last : Infinity;
+  const eligible = elapsed >= COOLDOWN_MS;
+
+  const remainingMs = eligible ? 0 : COOLDOWN_MS - elapsed;
+  const nextEligibleAt = eligible ? now : new Date(now.getTime() + remainingMs);
 
   return {
-    eligible: !hasClaimedToday,
-    lastBonusDate: lastBonusDate,
-    todayDate: todayDate,
-    message: hasClaimedToday
-      ? "You have already claimed your daily bonus today"
-      : "Daily bonus available!",
+    eligible,
+    lastBonusTimestamp: last ? last.toISOString() : null,
+    nextEligibleAt: nextEligibleAt.toISOString(),
+    message: eligible
+      ? "Bonus tersedia!"
+      : "Belum 24 jam sejak klaim terakhir.",
   };
 };
 
 const claimBonus = async (user) => {
-  const userRef = db.collection("user-profile").doc(user.uid);
-  const userSnap = await userRef.get();
-
-  if (!userSnap.exists) {
+  const ref = db.collection("user-profile").doc(user.uid);
+  const snap = await ref.get();
+  if (!snap.exists)
     throw new ConflictError("User profile not found", "INCOMPLETE_PROFILE");
-  }
 
-  const userData = userSnap.data();
-  const todayDate = getTodayDate();
-  const lastBonusDate = userData.lastBonusDate || null;
+  const data = snap.data();
+  const last = asDate(data.lastBonusTimestamp);
+  const now = new Date();
 
-  if (lastBonusDate === todayDate) {
+  const elapsed = last ? now - last : Infinity;
+  if (elapsed < COOLDOWN_MS) {
+    const remainingMs = COOLDOWN_MS - elapsed;
+    const nextEligibleAt = new Date(now.getTime() + remainingMs);
     throw new AuthorizationError(
-      "You have already claimed your daily bonus today. Come back tomorrow!",
+      `Sudah klaim. Coba lagi setelah 24 jam (pada ${nextEligibleAt.toISOString()}).`,
       "UNAUTHORIZED_ACTION"
     );
   }
 
-  const currentMoney = userData.money || 0;
   const bonusAmount = 100000;
-  const newMoney = currentMoney + bonusAmount;
+  const newMoney = (data.money ?? 0) + bonusAmount;
 
-  await userRef.update({
+  await ref.update({
     money: newMoney,
-    lastBonusDate: todayDate,
-    lastBonusTimestamp: new Date(),
+    lastBonusTimestamp: now,
   });
 
   return {
     bonus: bonusAmount,
     money: newMoney,
-    previousMoney: currentMoney,
-    bonusDate: todayDate,
-    message:
-      "Daily bonus claimed successfully! Come back tomorrow for another bonus.",
+    lastBonusTimestamp: now.toISOString(),
+    nextEligibleAt: new Date(now.getTime() + COOLDOWN_MS).toISOString(),
+    message: "Berhasil klaim! Bisa klaim lagi setelah 24 jam.",
   };
 };
 
