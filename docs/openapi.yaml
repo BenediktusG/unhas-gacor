@@ -155,12 +155,11 @@ paths:
 
   /bonus:
     get:
-      tags:
-        - User
-      description: Check if the user is eligible for the daily bonus
+      tags: [User]
+      description: Mengecek apakah pengguna berhak untuk klaim bonus harian (cooldown 24 jam sejak klaim terakhir)
       responses:
         200:
-          description: success get the user's daily bonus eligibility status
+          description: Berhasil mendapatkan status kelayakan klaim bonus harian
           content:
             application/json:
               schema:
@@ -170,25 +169,9 @@ paths:
                     type: boolean
                     example: true
                   data:
-                    type: object
-                    properties:
-                      eligible:
-                        type: boolean
-                        example: true
-                      lastBonusDate:
-                        type: string
-                        format: date
-                        nullable: true
-                        example: "2025-08-08"
-                      todayDate:
-                        type: string
-                        format: date
-                        example: "2025-08-08"
-                      message:
-                        type: string
-                        example: "Daily bonus available!"
+                    $ref: "#/components/schemas/BonusStatus"
         401:
-          description: Unauthorized - The user must be authenticated to access this resource.
+          description: Tidak diizinkan - Pengguna harus login untuk mengakses resource ini.
           content:
             application/json:
               schema:
@@ -197,30 +180,25 @@ paths:
                 AuthorizationError:
                   $ref: "#/components/examples/authRequiredError"
         409:
-          description: Failed to check the user's daily bonus due to incomplete user profile
+          description: Gagal mengecek bonus harian karena profil pengguna belum lengkap
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  error:
-                    type: object
-                    properties:
-                      code:
-                        type: string
-                        example: INCOMPLETE_PROFILE
-                      message:
-                        type: string
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                IncompleteProfile:
+                  value:
+                    success: false
+                    error:
+                      code: INCOMPLETE_PROFILE
+                      message: "Profil pengguna tidak ditemukan"
+
     post:
-      tags:
-        - User
-      description: Claim the user's daily bonus (once per day)
+      tags: [User]
+      description: Mengklaim bonus harian pengguna (cooldown persis 24 jam sejak klaim terakhir)
       responses:
         200:
-          description: success claim the daily bonus
+          description: Berhasil klaim bonus harian
           content:
             application/json:
               schema:
@@ -230,26 +208,19 @@ paths:
                     type: boolean
                     example: true
                   data:
-                    type: object
-                    properties:
-                      bonus:
-                        type: integer
-                        example: 100000
-                      money:
-                        type: integer
-                        example: 150000
-                      previousMoney:
-                        type: integer
-                        example: 50000
-                      bonusDate:
-                        type: string
-                        format: date
-                        example: "2025-08-08"
-                      message:
-                        type: string
-                        example: "Daily bonus claimed successfully! Come back tomorrow for another bonus."
+                    $ref: "#/components/schemas/BonusClaimResponse"
+              examples:
+                Success:
+                  value:
+                    success: true
+                    data:
+                      bonus: 100000
+                      money: 150000
+                      lastBonusTimestamp: "2025-08-09T06:05:15.000Z"
+                      nextEligibleAt: "2025-08-10T06:05:15.000Z"
+                      message: "Berhasil klaim! Bisa klaim lagi setelah 24 jam."
         401:
-          description: Unauthorized - The user must be authenticated to access this resource.
+          description: Tidak diizinkan - Pengguna harus login untuk mengakses resource ini.
           content:
             application/json:
               schema:
@@ -258,7 +229,7 @@ paths:
                 AuthorizationError:
                   $ref: "#/components/examples/authRequiredError"
         403:
-          description: Forbidden - The user is not authorized to claim the bonus (e.g., already claimed today)
+          description: Dilarang - Pengguna belum bisa klaim bonus (cooldown belum selesai)
           content:
             application/json:
               schema:
@@ -269,23 +240,20 @@ paths:
                     success: false
                     error:
                       code: UNAUTHORIZED_ACTION
-                      message: "You have already claimed your daily bonus today. Come back tomorrow!"
+                      message: "Sudah klaim. Coba lagi setelah 24 jam (pada 2025-08-10T06:05:15.000Z)."
         409:
-          description: Failed to claim the daily bonus due to incomplete user profile
+          description: Gagal klaim bonus harian karena profil pengguna belum lengkap
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  error:
-                    type: object
-                    properties:
-                      code:
-                        type: string
-                        example: INCOMPLETE_PROFILE
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                IncompleteProfile:
+                  value:
+                    success: false
+                    error:
+                      code: INCOMPLETE_PROFILE
+                      message: "Profil pengguna tidak ditemukan"
 
   /spin:
     post:
@@ -359,16 +327,64 @@ components:
               type: array
               items:
                 type: object
+
+    BonusStatus:
+      type: object
+      properties:
+        eligible:
+          type: boolean
+          description: Apakah pengguna bisa klaim bonus sekarang (elapsed >= 24 jam)
+          example: true
+        lastBonusTimestamp:
+          type: string
+          format: date-time
+          nullable: true
+          description: Waktu klaim bonus terakhir dalam format ISO; null jika belum pernah klaim
+          example: "2025-08-09T06:05:15.000Z"
+        nextEligibleAt:
+          type: string
+          format: date-time
+          description: Waktu kapan pengguna bisa klaim lagi (sekarang atau last+24 jam)
+          example: "2025-08-10T06:05:15.000Z"
+        message:
+          type: string
+          example: "Bonus tersedia!"
+
+    BonusClaimResponse:
+      type: object
+      properties:
+        bonus:
+          type: integer
+          description: Jumlah bonus yang diberikan
+          example: 100000
+        money:
+          type: integer
+          description: Saldo pengguna setelah klaim
+          example: 150000
+        lastBonusTimestamp:
+          type: string
+          format: date-time
+          description: Waktu klaim bonus dalam format ISO
+          example: "2025-08-09T06:05:15.000Z"
+        nextEligibleAt:
+          type: string
+          format: date-time
+          description: Waktu kapan bisa klaim lagi (lastBonusTimestamp + 24 jam)
+          example: "2025-08-10T06:05:15.000Z"
+        message:
+          type: string
+          example: "Berhasil klaim! Bisa klaim lagi setelah 24 jam."
+
   examples:
     authRequiredError:
       value:
         success: false
         error:
           code: AUTH_REQUIRED
-          message: You have to authenticated to access this resource
+          message: "You have to be authenticated to access this resource"
     unauthorizedError:
       value:
         success: false
         error:
           code: UNAUTHORIZED_ACTION
-          message: You are not authorized to do the action
+          message: "You are not authorized to do the action"
