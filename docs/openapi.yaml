@@ -1,9 +1,9 @@
 openapi: 3.0.3
-info: 
+info:
   title: Unhas Gacor 77
   description: Online slot machine simulation
   version: 1.0.0
-  
+
 paths:
   /register:
     post:
@@ -46,7 +46,7 @@ paths:
                   error:
                     type: object
                     properties:
-                      code: 
+                      code:
                         type: string
                         example: VALIDATION_ERROR
                       message:
@@ -56,14 +56,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 AuthorizationError:
-                  $ref: '#/components/examples/authRequiredError'
+                  $ref: "#/components/examples/authRequiredError"
   /profile:
     get:
       tags:
-      - User
+        - User
       description: Get user information
       responses:
         200:
@@ -78,7 +78,7 @@ paths:
                   data:
                     type: object
                     properties:
-                      fullName: 
+                      fullName:
                         type: string
                       money:
                         type: number
@@ -87,10 +87,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 AuthorizationError:
-                  $ref: '#/components/examples/authRequiredError'
+                  $ref: "#/components/examples/authRequiredError"
         409:
           description: Failed to get the user information due to incomplete user profile
           content:
@@ -103,11 +103,11 @@ paths:
                   error:
                     type: object
                     properties:
-                      code: 
+                      code:
                         type: string
                         example: INCOMPLETE_PROFILE
                       message:
-                        type: string                
+                        type: string
   /money:
     get:
       tags:
@@ -121,7 +121,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  success: 
+                  success:
                     type: boolean
                   data:
                     type: object
@@ -133,10 +133,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 AuthorizationError:
-                  $ref: '#/components/examples/authRequiredError'
+                  $ref: "#/components/examples/authRequiredError"
         409:
           description: Failed to get the user information due to incomplete user profile
           content:
@@ -149,85 +149,116 @@ paths:
                   error:
                     type: object
                     properties:
-                      code: 
+                      code:
                         type: string
                         example: INCOMPLETE_PROFILE
-  
+
   /bonus:
     get:
-      tags:
-      - User
-      description: Check if the user is eliglbe for the bonus
+      tags: [User]
+      description: Mengecek apakah pengguna berhak untuk klaim bonus harian (cooldown 24 jam sejak klaim terakhir)
       responses:
         200:
-          description: success get the user's bonus eligibility status
+          description: Berhasil mendapatkan status kelayakan klaim bonus harian
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  success: 
+                  success:
                     type: boolean
+                    example: true
                   data:
-                    type: object
-                    properties:
-                      eligible:
-                        type: boolean
+                    $ref: "#/components/schemas/BonusStatus"
         401:
-          description: Unauthorized - The user must be authenticated to access this resource.
+          description: Tidak diizinkan - Pengguna harus login untuk mengakses resource ini.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 AuthorizationError:
-                  $ref: '#/components/examples/authRequiredError'
+                  $ref: "#/components/examples/authRequiredError"
+        409:
+          description: Gagal mengecek bonus harian karena profil pengguna belum lengkap
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                IncompleteProfile:
+                  value:
+                    success: false
+                    error:
+                      code: INCOMPLETE_PROFILE
+                      message: "Profil pengguna tidak ditemukan"
+
     post:
-      tags:
-      - User
-      description: Get bonus for the user
+      tags: [User]
+      description: Mengklaim bonus harian pengguna (cooldown persis 24 jam sejak klaim terakhir)
       responses:
         200:
-          description: success receive the bonus
+          description: Berhasil klaim bonus harian
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  success: 
+                  success:
                     type: boolean
+                    example: true
                   data:
-                    type: object
-                    properties:
-                      bonus:
-                        type: integer
-                        example: 10000
-                      money:
-                        type: integer
-                        example: 11000
+                    $ref: "#/components/schemas/BonusClaimResponse"
+              examples:
+                Success:
+                  value:
+                    success: true
+                    data:
+                      bonus: 100000
+                      money: 150000
+                      lastBonusTimestamp: "2025-08-09T06:05:15.000Z"
+                      nextEligibleAt: "2025-08-10T06:05:15.000Z"
+                      message: "Berhasil klaim! Bisa klaim lagi setelah 24 jam."
         401:
-          description: Unauthorized - The user must be authenticated to access this resource.
+          description: Tidak diizinkan - Pengguna harus login untuk mengakses resource ini.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 AuthorizationError:
-                  $ref: '#/components/examples/authRequiredError'
-        
+                  $ref: "#/components/examples/authRequiredError"
         403:
-          description: Forbidden - The user is not authorized to do the action
+          description: Dilarang - Pengguna belum bisa klaim bonus (cooldown belum selesai)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
-                Forbidden:
-                  $ref: '#/components/examples/unauthorizedError'
+                AlreadyClaimed:
+                  value:
+                    success: false
+                    error:
+                      code: UNAUTHORIZED_ACTION
+                      message: "Sudah klaim. Coba lagi setelah 24 jam (pada 2025-08-10T06:05:15.000Z)."
+        409:
+          description: Gagal klaim bonus harian karena profil pengguna belum lengkap
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                IncompleteProfile:
+                  value:
+                    success: false
+                    error:
+                      code: INCOMPLETE_PROFILE
+                      message: "Profil pengguna tidak ditemukan"
+
   /spin:
     post:
       tags:
-      - Game
+        - Game
       description: Spin the slot machine
       requestBody:
         content:
@@ -247,7 +278,7 @@ paths:
                 properties:
                   success:
                     type: boolean
-                  data: 
+                  data:
                     type: object
                     properties:
                       reward:
@@ -263,20 +294,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 AuthorizationError:
-                  $ref: '#/components/examples/authRequiredError'
+                  $ref: "#/components/examples/authRequiredError"
         403:
           description: Forbidden - The user is not authorized to do the action
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 Forbidden:
-                  $ref: '#/components/examples/unauthorizedError'
-      
+                  $ref: "#/components/examples/unauthorizedError"
+
 components:
   schemas:
     ErrorResponse:
@@ -285,7 +316,7 @@ components:
         success:
           type: boolean
           example: false
-        error: 
+        error:
           type: object
           properties:
             code:
@@ -296,16 +327,64 @@ components:
               type: array
               items:
                 type: object
+
+    BonusStatus:
+      type: object
+      properties:
+        eligible:
+          type: boolean
+          description: Apakah pengguna bisa klaim bonus sekarang (elapsed >= 24 jam)
+          example: true
+        lastBonusTimestamp:
+          type: string
+          format: date-time
+          nullable: true
+          description: Waktu klaim bonus terakhir dalam format ISO; null jika belum pernah klaim
+          example: "2025-08-09T06:05:15.000Z"
+        nextEligibleAt:
+          type: string
+          format: date-time
+          description: Waktu kapan pengguna bisa klaim lagi (sekarang atau last+24 jam)
+          example: "2025-08-10T06:05:15.000Z"
+        message:
+          type: string
+          example: "Bonus tersedia!"
+
+    BonusClaimResponse:
+      type: object
+      properties:
+        bonus:
+          type: integer
+          description: Jumlah bonus yang diberikan
+          example: 100000
+        money:
+          type: integer
+          description: Saldo pengguna setelah klaim
+          example: 150000
+        lastBonusTimestamp:
+          type: string
+          format: date-time
+          description: Waktu klaim bonus dalam format ISO
+          example: "2025-08-09T06:05:15.000Z"
+        nextEligibleAt:
+          type: string
+          format: date-time
+          description: Waktu kapan bisa klaim lagi (lastBonusTimestamp + 24 jam)
+          example: "2025-08-10T06:05:15.000Z"
+        message:
+          type: string
+          example: "Berhasil klaim! Bisa klaim lagi setelah 24 jam."
+
   examples:
     authRequiredError:
       value:
         success: false
-        error: 
+        error:
           code: AUTH_REQUIRED
-          message: You have to authenticated to access this resource
+          message: "You have to be authenticated to access this resource"
     unauthorizedError:
       value:
         success: false
-        error: 
+        error:
           code: UNAUTHORIZED_ACTION
-          message: You are not authorized to do the action
+          message: "You are not authorized to do the action"
